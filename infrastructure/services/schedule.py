@@ -9,11 +9,17 @@ from domain.values.week_kind import WeekKindEnum
 
 
 class ScheduleServiceImpl(ScheduleService):
-    def __init__(self, url: str):
-        self.url = url
+    url = "https://schedule-of.mirea.ru/schedule/api/search?limit=15&match=%s"
+    def __init__(self, group: str):
+        self.url = self.url % group
+        
+    def _get_schedule_ical_url(self) -> str:
+        ical = requests.get(self.url).json()
+        
+        return ical["data"][0]["iCalLink"]
 
-    def get_schedule(self):
-        ical = requests.get(self.url).content
+    def get_schedule(self) -> tuple[ScheduleEntity, ScheduleEntity]:
+        ical = requests.get(self._get_schedule_ical_url()).content
 
         calendar = icalendar.Calendar.from_ical(ical)
 
