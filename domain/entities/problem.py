@@ -1,5 +1,6 @@
 from domain.entities.base import BaseEntity
 
 
-class TeacherEntity(BaseEntity):
+class ProblemEntity(BaseEntity):
     name: str
+    description: str

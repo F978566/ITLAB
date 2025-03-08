@@ -1,11 +1,11 @@
 from abc import ABC
-from dataclasses import dataclass, field
 from uuid import uuid4
 
+from pydantic import BaseModel, Field
 
-@dataclass
-class BaseEntity(ABC):
-    oid: str = field(
-        default_factory=lambda: str(uuid4),
-        kw_only=True
-    )
+
+class BaseEntity(BaseModel, ABC):
+    oid: str = Field(default_factory=lambda: str(uuid4()))
+
+    class Config:
+        arbitrary_types_allowed = True

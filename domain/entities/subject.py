@@ -1,15 +1,10 @@
-from dataclasses import dataclass
-from datetime import datetime
-
-from domain.entities.base import BaseEntity
-from domain.values.day import DayEnum
+from datetime import time
+from pydantic import BaseModel
 
 
-@dataclass
-class SubjectEntity(BaseEntity):
+class SubjectEntity(BaseModel):
     name: str
-    time_start: datetime
-    time_end: datetime
+    time_start: time
+    time_end: time
     location: str
-    # day: DayEnum
     day: int
