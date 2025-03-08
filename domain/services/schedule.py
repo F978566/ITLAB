@@ -1,7 +1,7 @@
 from typing import Protocol
 
-from domain.entities.schedule import ScheduleEntity
+from domain.entities.week_schedule import WeekScheduleEntity
 
 
 class ScheduleService(Protocol):
-    def get_schedule(self) -> ScheduleEntity: ...
+    def get_schedule(self) -> WeekScheduleEntity: ...
