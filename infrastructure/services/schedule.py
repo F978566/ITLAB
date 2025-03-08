@@ -1,4 +1,5 @@
 import datetime
+from typing import List
 import icalendar
 import requests
 
@@ -12,17 +13,33 @@ from domain.values.week_kind import WeekKindEnum
 
 class ScheduleServiceImpl(ScheduleService):
     url = "https://schedule-of.mirea.ru/schedule/api/search?limit=15&match=%s"
+    default_url = "https://schedule-of.mirea.ru/schedule/api/search?limit=15&match="
 
-    def __init__(self, group: str):
-        self.url = self.url % group
+    def __init__(self, title: str):
+        self.url = self.url % title
+        self.title = title
 
     def _get_schedule_ical_url(self) -> str:
         ical = requests.get(self.url).json()
 
-        return ical["data"][0]["iCalLink"]
+        return ical["data"]
+    
+    def _get_default_schedule(self):
+        ical = requests.get(self.default_url).json()
 
-    def get_schedule(self) -> tuple[WeekScheduleEntity, WeekScheduleEntity]:
-        ical = requests.get(self._get_schedule_ical_url()).content
+        return ical["data"][0]["iCalLink"]
+    
+    def get_schedule_list(self) -> List[tuple[WeekScheduleEntity, WeekScheduleEntity]]:
+        ical_data_list = self._get_schedule_ical_url()
+        schedule_list = []
+        
+        for data in ical_data_list:
+            schedule_list.append(self._get_schedule(data["iCalLink"]))
+        
+        return schedule_list
+
+    def _get_schedule(self, schedule_url: str) -> tuple[WeekScheduleEntity, WeekScheduleEntity]:
+        ical = requests.get(schedule_url).content
 
         calendar = icalendar.Calendar.from_ical(ical)
 

@@ -8,16 +8,18 @@ class ScheduleProblemsService:
     def __init__(self, schedule_repository: ScheduleRepository):
         self.schedule_repository = schedule_repository
         self.problems = []
-        
-    
-    def find_problems(self):
-        schedule = self.schedule_repository.get_schedule()
-        self.big_workload_differences(schedule)
-        for week_schedule in schedule:
-            self.long_commute(week_schedule)
-            self.late_start(week_schedule)
 
-    def big_workload_differences(self, schedule: WeekScheduleEntity) -> List[ProblemEntity]:
+    def find_problems(self):
+        schedule_list = self.schedule_repository.get_schedule_list()
+        for schedule in schedule_list:
+            self.big_workload_differences(schedule)
+            for week_schedule in schedule:
+                self.long_commute(week_schedule)
+                self.late_start(week_schedule)
+
+    def big_workload_differences(
+        self, schedule: WeekScheduleEntity
+    ) -> List[ProblemEntity]:
         odd_differences = self.workload_differences(schedule[0])
         even_differences = self.workload_differences(schedule[1])
 
@@ -51,7 +53,9 @@ class ScheduleProblemsService:
 
     def long_commute(self, week_schedule: WeekScheduleEntity):
         get_auditorium = lambda x: x.split("-")[0]
-        time_difference = lambda x, y: abs(x.hour * 60 + x.minute - x.hour * 60 - y.minute)
+        time_difference = lambda x, y: abs(
+            x.hour * 60 + x.minute - x.hour * 60 - y.minute
+        )
 
         for day in week_schedule.schedule:
             if len(day.subjects) <= 1:
@@ -74,7 +78,10 @@ class ScheduleProblemsService:
                 prev_subject = subject
 
     def late_start(self, week_schedule: WeekScheduleEntity):
-         for day in week_schedule.schedule:
+        for day in week_schedule.schedule:
+            if len(day.subjects) == 0:
+                continue
+
             first_class = sorted(day.subjects, key=lambda x: x.time_start.hour)[0]
             if first_class.time_start.hour < 12:
                 self.problems.append(
