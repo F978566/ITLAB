@@ -8,3 +8,4 @@ from domain.values.week_kind import WeekKindEnum
 class WeekScheduleEntity(BaseEntity):
     week: WeekKindEnum
     schedule: List[DayScheduleEntity]
+    full_group_title: str
