@@ -11,10 +11,15 @@ Create a .env file in the root directory with the following content:
 
 # Database configuration
 DB_USER=your_postgres_user
+<br/>
 DB_PASSWORD=your_secure_password
+<br/>
 DB_NAME=your_database_name
+<br/>
 DB_HOST=db
+<br/>
 DB_PORT=5432
+<br/>
 DATABASE_URL=postgresql+asyncpg://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}
 
 Replace your_postgres_user, your_secure_password, and your_database_name with your preferred values.
