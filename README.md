@@ -36,7 +36,11 @@ docker-compose up --build
 The --build flag ensures the application image is rebuilt if there are changes.
 
 This command will:
-Build the FastAPI app container from the Dockerfile.
+Build the FastAPI app container from the Docker
+
+Uploading 20250309-2034-513454863_jbB7VYjA.mp4…
+
+file.
 
 Start a PostgreSQL container.
 
@@ -60,6 +64,10 @@ docker-compose down
 To also remove the database volume (and lose all data), use:
 
 ```console
+
+https://github.com/user-attachments/assets/a5d5c41b-e424-49f2-9e35-774a7232915d
+
+
 docker-compose down -v
 ```
 Additional Commands
