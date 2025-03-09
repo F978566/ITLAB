@@ -1,21 +1,80 @@
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from domain.entities.problem import ProblemEntity
 from domain.entities.problem_list import ProblemListEntity
 from domain.entities.week_schedule import WeekScheduleEntity
+from domain.repositories.full_title import FullTitleRepository
+from domain.repositories.problems import ProblemsRepository
 from domain.repositories.schedule import ScheduleRepository
+from domain.repositories.title import TitleRepository
+from infrastructure.db.models.models import FullTitleModel, ProblemModel, TitleModel
 
 
 class ScheduleProblemsService:
-    def __init__(self, schedule_repository: ScheduleRepository):
+    def __init__(
+        self,
+        schedule_repository: ScheduleRepository,
+        title_repository: TitleRepository,
+        full_title_repository: FullTitleRepository,
+        problems_repository: ProblemsRepository,
+    ):
         self.schedule_repository = schedule_repository
         self.problems: dict[str, ProblemListEntity] = {}
+        self.title_repository = title_repository
+        self.full_title_repository = full_title_repository
+        self.problems_repository = problems_repository
+        self.title = ""
 
-    def find_problems(self, title: str):
-        schedule_list = self.schedule_repository.get_schedule_list(title)
+    async def _save_to_db(self, db: AsyncSession):
+        title = TitleModel(
+            title=self.title if self.title != "" else "empty",
+        )
+        db.add(title)
+
+        await db.commit()
+
+        for full_title_problems in self.problems.keys():
+            full_title = FullTitleModel(
+                full_title=full_title_problems, title_id=title.id
+            )
+            db.add(full_title)
+            await db.commit()
+            for problem in self.problems[full_title_problems].problems:
+                pr = ProblemModel(
+                    title_id=full_title.id,
+                    name=problem.name,
+                    description=problem.description,
+                )
+                db.add(pr)
+
+        await db.commit()
+
+    async def _get_from_db(self, title: str, db: AsyncSession):
+        title_model = await self.title_repository.get_title_by_name(title, db)
+        # print(title_model.oid)
+        full_title_list = await self.full_title_repository.get_full_titles(title_model.oid, db)
+
+        for full_title in full_title_list:
+            self.problems[full_title.title] = ProblemListEntity(
+                full_group_title=full_title.title,
+                problems=(await self.problems_repository.get_problems(full_title.oid, db)),
+            )
+
+    async def find_problems(self, db: AsyncSession):
+        if await self.title_repository.check_title_exist(
+            self.title if self.title != "" else "empty", db
+        ):
+            await self._get_from_db(self.title if self.title != "" else "empty", db)
+            return
+
+        schedule_list = self.schedule_repository.get_schedule_list(self.title)
         for schedule in schedule_list:
             self.big_workload_differences(schedule)
             for week_schedule in schedule:
                 self.long_commute(week_schedule)
                 self.late_start(week_schedule)
+
+        await self._save_to_db(db)
 
     def big_workload_differences(
         self, schedule: tuple[WeekScheduleEntity, WeekScheduleEntity]
@@ -37,7 +96,9 @@ class ScheduleProblemsService:
             )
 
         if problems_list.full_group_title in self.problems:
-            self.problems[problems_list.full_group_title].problems.extend(problems_list.problems)
+            self.problems[problems_list.full_group_title].problems.extend(
+                problems_list.problems
+            )
         else:
             self.problems[problems_list.full_group_title] = problems_list
 
@@ -91,7 +152,9 @@ class ScheduleProblemsService:
                 prev_subject = subject
 
         if problems_list.full_group_title in self.problems:
-            self.problems[problems_list.full_group_title].problems.extend(problems_list.problems)
+            self.problems[problems_list.full_group_title].problems.extend(
+                problems_list.problems
+            )
         else:
             self.problems[problems_list.full_group_title] = problems_list
 
@@ -115,6 +178,8 @@ class ScheduleProblemsService:
                 )
 
         if problems_list.full_group_title in self.problems:
-            self.problems[problems_list.full_group_title].problems.extend(problems_list.problems)
+            self.problems[problems_list.full_group_title].problems.extend(
+                problems_list.problems
+            )
         else:
             self.problems[problems_list.full_group_title] = problems_list
