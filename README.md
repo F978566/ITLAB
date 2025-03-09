@@ -28,9 +28,10 @@ Do not commit the .env file to version control (add it to .gitignore).
 
 3. Build and Run the Application
 Run the following command to build the Docker images and start the containers:
-bash
 
+```console
 docker-compose up --build
+```
 
 The --build flag ensures the application image is rebuilt if there are changes.
 
@@ -51,50 +52,52 @@ http://localhost:8000
 You can test the root endpoint (/) or any other endpoints defined in presentation/api/main.py.
 5. Stop the Application
 To stop the running containers, press Ctrl+C in the terminal where docker-compose up is running, or run:
-bash
 
+```console
 docker-compose down
+```
 
 To also remove the database volume (and lose all data), use:
 
-bash
-
+```console
 docker-compose down -v
-
+```
 Additional Commands
 Running Migrations Manually
 If you need to run Alembic migrations separately:
 Start the database container:
 
-bash
-
+```console
 docker-compose up -d db
+```
 
 Access the app container:
 
-bash
-
+```console
 docker-compose run app bash
+```
 
 Inside the container, run:
 
-bash
-
+```console
 alembic upgrade head
+```
 
 Development Mode
 The app runs with Uvicorn's --reload flag enabled for hot reloading during development. Any changes to files in presentation/api/ will automatically restart the server.
 Logs
 View container logs with:
-bash
 
+```console
 docker-compose logs
+```
 
 Or for a specific service:
-bash
 
+```console
 docker-compose logs app
 docker-compose logs db
+```
 
 Troubleshooting
 Port Conflicts: If ports 8000 or 5432 are in use, update the ports mappings in docker-compose.yml (e.g., change 8000:8000 to 8080:8000).
