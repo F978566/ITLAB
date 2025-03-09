@@ -1,4 +1,3 @@
-from typing import List
 from domain.entities.problem import ProblemEntity
 from domain.entities.problem_list import ProblemListEntity
 from domain.entities.week_schedule import WeekScheduleEntity
@@ -10,8 +9,8 @@ class ScheduleProblemsService:
         self.schedule_repository = schedule_repository
         self.problems: dict[str, ProblemListEntity] = {}
 
-    def find_problems(self):
-        schedule_list = self.schedule_repository.get_schedule_list()
+    def find_problems(self, title: str):
+        schedule_list = self.schedule_repository.get_schedule_list(title)
         for schedule in schedule_list:
             self.big_workload_differences(schedule)
             for week_schedule in schedule:
@@ -38,7 +37,7 @@ class ScheduleProblemsService:
             )
 
         if problems_list.full_group_title in self.problems:
-            self.problems[problems_list.full_group_title].problems.append(problems_list)
+            self.problems[problems_list.full_group_title].problems.extend(problems_list.problems)
         else:
             self.problems[problems_list.full_group_title] = problems_list
 
@@ -92,7 +91,7 @@ class ScheduleProblemsService:
                 prev_subject = subject
 
         if problems_list.full_group_title in self.problems:
-            self.problems[problems_list.full_group_title].problems.append(problems_list)
+            self.problems[problems_list.full_group_title].problems.extend(problems_list.problems)
         else:
             self.problems[problems_list.full_group_title] = problems_list
 
@@ -106,16 +105,16 @@ class ScheduleProblemsService:
                 continue
 
             first_class = sorted(day.subjects, key=lambda x: x.time_start.hour)[0]
-            if first_class.time_start.hour < 12:
+            if first_class.time_start.hour > 12:
                 problems_list.problems.append(
                     ProblemEntity(
                         name="Late start",
-                        description=f"It is better to start the day early {first_class.time_start.hour} in the morning - {day.day_of_week.name} week - {week_schedule.week.name}",
+                        description=f"It is better to start the day earlier than at {first_class.time_start.hour} in the morning - {day.day_of_week.name} week - {week_schedule.week.name}",
                         full_group_title=week_schedule.full_group_title,
                     )
                 )
 
         if problems_list.full_group_title in self.problems:
-            self.problems[problems_list.full_group_title].problems.append(problems_list)
+            self.problems[problems_list.full_group_title].problems.extend(problems_list.problems)
         else:
             self.problems[problems_list.full_group_title] = problems_list

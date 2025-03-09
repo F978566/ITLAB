@@ -15,22 +15,14 @@ class ScheduleServiceImpl(ScheduleService):
     url = "https://schedule-of.mirea.ru/schedule/api/search?limit=15&match=%s"
     default_url = "https://schedule-of.mirea.ru/schedule/api/search?limit=15&match="
 
-    def __init__(self, title: str):
+    def _get_schedule_ical_url(self, title: str) -> str:
         self.url = self.url % title
-        self.title = title
-
-    def _get_schedule_ical_url(self) -> str:
         ical = requests.get(self.url).json()
 
         return ical["data"]
     
-    def _get_default_schedule(self):
-        ical = requests.get(self.default_url).json()
-
-        return ical["data"][0]["iCalLink"]
-    
-    def get_schedule_list(self) -> List[tuple[WeekScheduleEntity, WeekScheduleEntity]]:
-        ical_data_list = self._get_schedule_ical_url()
+    def get_schedule_list(self, title: str) -> List[tuple[WeekScheduleEntity, WeekScheduleEntity]]:
+        ical_data_list = self._get_schedule_ical_url(title)
         schedule_list = []
         
         for data in ical_data_list:
@@ -74,9 +66,11 @@ class ScheduleServiceImpl(ScheduleService):
             WeekScheduleEntity(
                 week=WeekKindEnum.odd,
                 schedule=subjects_odd,
+                full_group_title=calendar.get("X-WR-CALNAME")
             ),
             WeekScheduleEntity(
                 week=WeekKindEnum.even,
                 schedule=subjects_even,
+                full_group_title=calendar.get("X-WR-CALNAME")
             ),
         )
