@@ -38,7 +38,7 @@ The --build flag ensures the application image is rebuilt if there are changes.
 This command will:
 Build the FastAPI app container from the Docker
 
-Uploading 20250309-2034-513454863_jbB7VYjA.mp4…
+https://github.com/user-attachments/assets/8e624ee8-d5b1-40d7-ae3b-d3525db238b1
 
 file.
 
@@ -83,6 +83,10 @@ Access the app container:
 
 ```console
 docker-compose run app bash
+
+https://github.com/user-attachments/assets/f9704a65-5198-48fa-8a0a-e1c040b5c018
+
+
 ```
 
 Inside the container, run:
@@ -120,4 +124,8 @@ The application uses PostgreSQL 15 and Python 3.11.
 The --reload flag is included for development; remove it from the command in docker-compose.yml for production use.
 
 Persistent database data is stored in a Docker volume named postgres_data.
+
+
+Uploading 20250309-2034-513454863_jbB7VYjA.mp4…
+
 
